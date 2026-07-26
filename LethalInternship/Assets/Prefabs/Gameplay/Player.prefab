@@ -199,6 +199,8 @@ MonoBehaviour:
   cameraController: {fileID: 0}
   followTarget: {fileID: 4912928695677640773}
   characterMovement: {fileID: 0}
+  abilityCamera: {fileID: 0}
+  abilityLoadout: {fileID: 11400000, guid: 0f4d583d57e0480796d0a643eefb67b3, type: 2}
 --- !u!143 &552209960931634171
 CharacterController:
   m_ObjectHideFlags: 0
@@ -237,17 +239,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 2
-  runSpeed: 5.5
-  jumpHeight: 1.5
-  gravity: -20
+  runSpeed: 7
+  jumpHeight: 2
+  gravity: -22
   groundedGraceTime: 0.12
+  groundedGravity: -2
+  jumpBufferTime: 0.1
+  airControl: 1
   fallingVelocityThreshold: -1
+  groundProbeRadius: 0.2
+  groundProbeDistance: 0.25
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  wallMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  wallContactLinger: 0.15
+  wallJumpCooldown: 0.2
+  wallJumpUpVelocity: 7.5
+  wallJumpHorizontalSpeed: 6
+  wallSurfaceMaxUpDot: 0.2
   rotationSpeed: 9
   allowWASD: 1
   useCameraRelative: 1
   cameraTransform: {fileID: 0}
-  horizontalOnlyTurnsInPlace: 1
-  turnInPlaceSpeed: 240
 --- !u!114 &7934625216598770003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -991,7 +1007,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1144013312869057472
 Transform:
   m_ObjectHideFlags: 0
@@ -1149,7 +1165,7 @@ SkinnedMeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 2
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: e445f945112064719ba7608af0fa767c, type: 2}
@@ -1713,7 +1729,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4803150279545536316
 Transform:
   m_ObjectHideFlags: 0

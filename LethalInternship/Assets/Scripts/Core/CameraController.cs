@@ -1,17 +1,24 @@
-// MMO-style third-person follow camera without mouse-orbit controls.
+// Shared follow camera that can run in third-person or top-down mode.
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    public enum CameraMode
+    {
+        ThirdPerson,
+        TopDown
+    }
+
+    [Header("Mode")]
+    [SerializeField] private CameraMode mode = CameraMode.ThirdPerson;
+
     [Header("Target")]
     [SerializeField] private Transform target;
     [SerializeField] private Transform yawAlignmentTarget;
     [SerializeField] private Vector3 pivotOffset = new Vector3(0f, 1.6f, 0f);
 
-    [Header("Pitch")]
+    [Header("Third Person")]
     [SerializeField] private float fixedPitch = 18f;
-
-    [Header("Zoom (Dolly)")]
     [SerializeField] private bool enableWheelZoomInput = false;
     [SerializeField] private float minDistance = 2.5f;
     [SerializeField] private float maxDistance = 10f;
@@ -37,6 +44,11 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float turnYawDeltaThreshold = 0.1f;
     [SerializeField] private float fallbackMoveSpeedThreshold = 0.15f;
 
+    [Header("Top Down")]
+    [SerializeField] private Vector3 topDownOffset = new Vector3(0f, 45f, -21f);
+    [SerializeField] private Vector3 topDownRotationEuler = new Vector3(65f, 0f, 0f);
+    [SerializeField] private float topDownFollowSmoothTime = 0.2f;
+
     private float yaw;
     private float targetDistance;
     private float zoomDistance;
@@ -50,6 +62,8 @@ public class CameraController : MonoBehaviour
     private Vector3 lastTargetPosition;
     private float lastAlignmentYaw;
     private bool hasLastAlignmentYaw;
+    private Vector3 topDownVelocity;
+    private CameraMode lastAppliedMode;
 
     private const int MaxSphereHits = 8;
     private readonly RaycastHit[] sphereHits = new RaycastHit[MaxSphereHits];
@@ -62,13 +76,14 @@ public class CameraController : MonoBehaviour
         cachedMovement = null;
         lastTargetPosition = target != null ? target.position : Vector3.zero;
         hasLastAlignmentYaw = false;
+        topDownVelocity = Vector3.zero;
 
         if (yawAlignmentTarget == null && target != null)
         {
             yawAlignmentTarget = target;
         }
 
-        InitializeFromCurrentPose(forceSnapPivot: true);
+        InitializeFromCurrentPose(forceSnap: true);
     }
 
     public void SetYawAlignmentTarget(Transform newYawAlignmentTarget)
@@ -80,7 +95,7 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-        InitializeFromCurrentPose(forceSnapPivot: true);
+        InitializeFromCurrentPose(forceSnap: true);
     }
 
     private void LateUpdate()
@@ -92,7 +107,18 @@ public class CameraController : MonoBehaviour
 
         if (!initialized)
         {
-            InitializeFromCurrentPose(forceSnapPivot: true);
+            InitializeFromCurrentPose(forceSnap: true);
+        }
+
+        if (lastAppliedMode != mode)
+        {
+            InitializeFromCurrentPose(forceSnap: true);
+        }
+
+        if (mode == CameraMode.TopDown)
+        {
+            UpdateTopDownCamera();
+            return;
         }
 
         UpdateZoomInput();
@@ -125,6 +151,17 @@ public class CameraController : MonoBehaviour
         Vector3 desiredPosition = smoothedPivotPosition - (desiredRotation * Vector3.forward * currentDistance);
         transform.position = desiredPosition;
         transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, rotationSmoothSpeed * Time.deltaTime);
+    }
+
+    private void UpdateTopDownCamera()
+    {
+        Vector3 desiredPosition = target.position + topDownOffset;
+        transform.position = Vector3.SmoothDamp(
+            transform.position,
+            desiredPosition,
+            ref topDownVelocity,
+            topDownFollowSmoothTime);
+        transform.rotation = Quaternion.Euler(topDownRotationEuler);
     }
 
     private void UpdateZoomInput()
@@ -188,11 +225,27 @@ public class CameraController : MonoBehaviour
         return Mathf.Clamp(safeDistance, minDistance, clampedRequestedDistance);
     }
 
-    private void InitializeFromCurrentPose(bool forceSnapPivot)
+    private void InitializeFromCurrentPose(bool forceSnap)
     {
         if (target == null)
         {
             initialized = false;
+            return;
+        }
+
+        lastAppliedMode = mode;
+        topDownVelocity = Vector3.zero;
+
+        if (mode == CameraMode.TopDown)
+        {
+            if (forceSnap || !initialized)
+            {
+                transform.position = target.position + topDownOffset;
+            }
+
+            transform.rotation = Quaternion.Euler(topDownRotationEuler);
+            lastTargetPosition = target.position;
+            initialized = true;
             return;
         }
 
@@ -208,7 +261,7 @@ public class CameraController : MonoBehaviour
         currentDistance = targetDistance;
         distanceVelocity = 0f;
 
-        if (forceSnapPivot || !initialized)
+        if (forceSnap || !initialized)
         {
             smoothedPivotPosition = pivotPosition;
             pivotVelocity = Vector3.zero;

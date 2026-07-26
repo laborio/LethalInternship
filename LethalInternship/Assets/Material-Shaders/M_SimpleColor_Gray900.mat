@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_SimpleColor_Gray400
+  m_Name: M_SimpleColor_Gray900
   m_Shader: {fileID: -6465566751694194690, guid: 030899aa77ac34071a5f820fce03eb5c, type: 3}
   m_Parent: {fileID: 2100000, guid: 44aa8ab84d54a41b281210db38a59663, type: 2}
   m_ModifiedSerializedProperties: 0
@@ -39,9 +39,8 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
-    m_Floats:
-    - _Color_Intensity: 1
+    m_Floats: []
     m_Colors:
-    - _Color: {r: 0.603, g: 0.603, b: 0.603, a: 0}
+    - _Color: {r: 0.199, g: 0.199, b: 0.199, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
